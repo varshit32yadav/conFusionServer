@@ -6,6 +6,22 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var dishRouter=require('./routes/dishRouter');
+var leaderRouter=require('./routes/leaderRouter');
+var promoRouter=require('./routes/promoRouter');
+
+
+//integrating database with http server
+const mongoose = require('mongoose');
+const Dishes = require('./models/dishes');
+
+const url = 'mongodb://localhost:27017/conFusion';
+const connect = mongoose.connect(url);
+
+connect.then((db) => {
+    console.log("Connected correctly to server");
+}, (err) => { console.log(err); });
+
 
 var app = express();
 
@@ -15,12 +31,15 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));//static server has been set up
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/dishes',dishRouter);
+app.use('/leaders',leaderRouter);
+app.use('/promotions',promoRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
