@@ -61,6 +61,6 @@ const dishSchema = new Schema({
 });
 
 
-var Dishes = mongoose.model('Dish', dishSchema); 
+var Dishes = mongoose.model('Dish', dishSchema); //plural of Dishes is automatically handled by mongoose
 
 module.exports = Dishes;

@@ -1,40 +1,83 @@
 const express =require('express');
 const bodyParser=require('body-Parser');
+
+const mongoose=require('mongoose');
+const Promotions=require('../models/promotions');
+
 const promoRouter=express.Router();
 promoRouter.use(bodyParser.json());
+
 promoRouter.route('/')
-.all((req,res,next)=>{
-    res.statusCode=200;
-    res.setHeader('Content-Type','text/plain');
-    next();
-})
 .get((req,res,next)=>{
-    res.end('<html><body><h1>will send all your Promotions</h1></body></html>');
+    Promotions.find({})
+    .then((promo)=>{
+        console.log('found your Dishes');
+        res.statusCode=200;
+        res.setHeader('Content-Type','application/json');
+        res.json(promo);
+    },err=>next(err))
+    .catch((err)=>next(err));
 })
 .post((req,res,next)=>{
-    res.end('we will add the Promo '+req.body.name+" and details as well "+req.body.description);
+    Promotions.create(req.body)
+    .then((promo)=>{
+        console.log("recieved the Promo"+promo);
+        res.statusCode=200;
+        res.setHeader('Content-Type','application/json');
+        res.json(promo);
+    },err=>next(err))
+    .catch((err)=>next(err));
+
 })
 .put((req,res,next)=>{
     res.statusCode=403;
     res.end('PUT method is not applicable here');
 })
 .delete((req,res,next)=>{
-    res.end('deleted your Promotions '+req.body.name +' successfully');
+    Promotions.remove()
+    .then((response)=>{
+        res.statusCode=200;
+        res.setHeader('Content-Type','application/json');
+        res.json(response);
+    },err=>next(err))
+    .catch((err)=>next(err));
 });
 
 promoRouter.route('/:promoId')
 .get((req,res,next)=>{             //methods operating for a for particular Promotion end point
-    res.end('will send details of the  Promotion '+req.params.promoId+'to you'); 
+   Promotions.findById(req.params.promoId)
+   .then((promo)=>{
+    res.statusCode=200;
+    res.setHeader('Content-Type','application/json');
+    res.json(promo);
+   },err=>next(err))
+   .catch((err)=>next(err));
 })
 .post((req,res,next)=>{    
     res.statusCode=403;
     res.end('POST operation is not supported on Promotion/'+req.params.promoId);
 })
 .put((req,res,next)=>{ 
-res.write('updating the Promotion \n');//used to add a line to the reply msg
-res.end('will update the Promtion:/'+req.params.promoId+'with details:'+req.body.description );
+    Promotions.findByIdAndUpdate(req.params.promoId,{
+        $set:req.body},
+        {new:true}    //when it is updated then take that dish in res body 
+    )
+    .then((updatedpromo)=>{
+
+        res.statusCode=200;
+        res.setHeader('Content-Type','application/json');
+        res.json(updatedpromo);
+    },err=>next(err))
+    .catch((err)=>next(err));
 })
 .delete((req,res,next)=>{ 
-res.end('deleting Promotion/'+req.params.promoId);
+    Promotions.findByIdAndRemove(req.params.promoId)
+    .then((response)=>{
+     res.statusCode=200;
+     res.setHeader('Content-Type','application/json');
+     res.json(response);
+    },err=>next(err))
+    .catch((err)=>next(err));
 });
+
 module.exports=promoRouter;
