@@ -4,11 +4,11 @@ const bodyParser = require('body-parser');
 const mongoose=require('mongoose');
 const Dishes=require('../models/dishes');
 
-const dishRouter=express.Router();  //mini express application
+const dishRouter=express.Router();  //mini express application (used to create a new router object)
 
 dishRouter.use(bodyParser.json());
 dishRouter.route('/')    //by using this approach we r declaring several end oints at one single location where you can chain all the methods to use them
-.get((req,res,next)=>{
+.get((req,res,next)=>{    //we have thre callbacks req,res,next.
     Dishes.find({})      //mongoose operation
     .then((dishes)=>{
         res.statusCode=200;
@@ -92,7 +92,7 @@ dishRouter.route('/:dishId/comments')
         else {
             err = new Error('Dish ' + req.params.dishId + ' not found');
             err.status = 404;
-            return next(err);
+            return next(err);  //all the code below this will be unreachable an it will be out of callback function
         }
     }, (err) => next(err))
     .catch((err) => next(err));
@@ -188,7 +188,7 @@ dishRouter.route('/:dishId/comments/:commentId')
             .then((dish) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(dish);                
+                res.json(dish.comments.id(req.params.commentId));                
             }, (err) => next(err));
         }
         else if (dish == null) {
