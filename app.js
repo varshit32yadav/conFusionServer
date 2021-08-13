@@ -32,30 +32,47 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));//static server has been set up
-app.use(cookieParser());
+app.use(cookieParser('12345-67890-09876-54321'));//making signed cookies by giving some secret key to it .
 
 function auth (req, res, next) {
- console.log(req.headers);
-  var authHeader = req.headers.authorization;
-  if (!authHeader) {
-      var err = new Error('You are not authenticated!');// no authorization header is given .
-      res.setHeader('WWW-Authenticate', 'Basic');
+ console.log(req.signedCookies);
+  if(!req.signedCookies.user)//if user is not authourized yet i.e there is not cookie in the req header
+  {
+      var authHeader = req.headers.authorization;
+      if (!authHeader) {
+          var err = new Error('You are not authenticated!');// no authorization header is given .
+          res.setHeader('WWW-Authenticate', 'Basic');
+          err.status = 401;
+          next(err);
+          return;
+      }
+      //if authHeader is there then we will extract the usern and pass from base encoded 64 dig number 
+      var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':'); //we are extracting [1]second element (base64 no.)from the array;
+      var user = auth[0];
+      var pass = auth[1];
+      if (user == 'admin' && pass == 'password') {
+        res.cookie('user','admin',{signed:true})  //name of the cookie is "user" and its value ="admin"
+        next(); // authorized and you can go to the next middleware(i.e here next is express.static).
+      } else {
+          var err = new Error('You are not authenticated!');//this for clients for correct registrations.
+          res.setHeader('WWW-Authenticate', 'Basic');      
+          err.status = 401;
+          next(err);
+      }
+  }
+  else{
+    if(req.signedCookies.user=='admin'){
+      next();//authourized go to next middleware
+    }
+    else{
+      var err = new Error('You are not authenticated!');    
       err.status = 401;
       next(err);
-      return;
+    }
+
   }
-   //if authHeader is there then we will extract the usern and pass from base encoded 64 dig number 
-  var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':'); //we are extracting [1]second element (base64 no.)from the array;
-  var user = auth[0];
-  var pass = auth[1];
-  if (user == 'admin' && pass == 'password') {
-      next(); // authorized and you can go to the next middleware(i.e here next is express.static).
-  } else {
-      var err = new Error('You are not authenticated!');//this for clients for correct registrations.
-      res.setHeader('WWW-Authenticate', 'Basic');      
-      err.status = 401;
-      next(err);
-  }
+
+  
 }
 
 app.use(auth);
