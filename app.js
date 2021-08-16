@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var session=require('express-session');
 var fileStore=require('session-file-store')(session);
+var passport=require('passport');
+var authenticate=require('./authenticate');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
@@ -16,6 +18,7 @@ var promoRouter=require('./routes/promoRouter');
 //integrating database with http server
 const mongoose = require('mongoose');
 const Dishes = require('./models/dishes');
+const { register } = require('./models/dishes');
 
 const url = 'mongodb://localhost:27017/conFusion';
 const connect = mongoose.connect(url);
@@ -43,28 +46,21 @@ app.use(session({     //created session object.
     resave:false,
     store:new fileStore()
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 //all the endpoints above authentication function dont need any authentication but all below it needs auth.
 function auth (req, res, next) {
-    console.log(req.session);
 
-  if(!req.session.user) {
+  if(!req.user) { //req.user will be loaded by passport.session middleware automatically.
       var err = new Error('You are not authenticated bro!'); //i.e. you are not logged in yet.
       err.status = 403;
       return next(err);
   }
-  else 
- {
-    if (req.session.user === 'authenticated') {
-      next();
-    }
-    else {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-    }
-  }
+  else    //if req.user is present that means passport has done the authentication (authenticat())and send user properties int he session
+    next();
+   
 }
 
 app.use(auth);
