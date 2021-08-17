@@ -6,6 +6,7 @@ var session=require('express-session');
 var fileStore=require('session-file-store')(session);
 var passport=require('passport');
 var authenticate=require('./authenticate');
+var config=require('./config');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
@@ -39,32 +40,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));//static server has been set up
 //app.use(cookieParser('12345-67890-09876-54321'));//making signed cookies by giving some secret key to it .
 
-app.use(session({     //created session object.
-    name:"session-id",  //name of cookie
-    secret:"12345-67890-09876-54321",
-    saveUninitialized:false,
-    resave:false,
-    store:new fileStore()
-}));
+
 app.use(passport.initialize());
-app.use(passport.session());
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-//all the endpoints above authentication function dont need any authentication but all below it needs auth.
-function auth (req, res, next) {
-
-  if(!req.user) { //req.user will be loaded by passport.session middleware automatically.
-      var err = new Error('You are not authenticated bro!'); //i.e. you are not logged in yet.
-      err.status = 403;
-      return next(err);
-  }
-  else    //if req.user is present that means passport has done the authentication (authenticat())and send user properties int he session
-    next();
-   
-}
-
-app.use(auth);
- //we want to do authentication right before the info is fetched from th e server. So before express.static well do authentication
 app.use(express.static(path.join(__dirname, 'public'))); //enables us to serve static data from public folder
 
 app.use('/dishes',dishRouter);

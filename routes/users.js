@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser=require('body-parser');
+var authenticate=require('../authenticate');
 var router = express.Router();
 var User=require('../models/user');
 var passport=require('passport');
@@ -31,10 +32,11 @@ router.post('/signup', (req, res, next) => {  //only post methid is applicable i
 //login  here we already expect the login details to be there in the body of the incoming req message .(rather then checking in the authentication header like we did earlier);
 router.post('/login', passport.authenticate('local'),    //passport.authenticate('local') automatically checks the authentication and adds user property(req.user) and gives error if not auth. then only it go forward.
             (req, res, ) => {
+              var token=authenticate.getToken({_id:req.user._id}); //we r creating the token when the authentication is done by just giving user id as info for the user to get recognised .
               res.statusCode = 200;
               res.setHeader('Content-Type', 'application/json');
-              res.json({success: true, status: 'You are successfully logged in!'});
-            
+              res.json({success: true,token:token, status: 'You are successfully logged in!'});
+              //pass the token back to the user
             });
 
 //logout            
