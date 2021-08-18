@@ -37,7 +37,7 @@ exports.jwtPassport=passport.use(new JwtStrategy(opts,(jwt_payload,done)=>{   //
                 return done(err,false)//user doesnot exist.
             }
             else if(user!=null){
-                return done(null,user);
+                return done(null,user);//user exist
             }
             else{  //to create new user but here not doing it so flase.
                 return done(null,false);//you can here basically create new user butu for simplicity here we didnt create any.

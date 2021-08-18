@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 require('mongoose-currency').loadType(mongoose);
-const Currency=mongoose.Types.Currency;  //we wiil use this in defining schema as currency is needed to tell dishes price
+const Currency=mongoose.Types.Currency;  //we will use this in defining schema as currency is needed to tell dishes price
 
 var commentSchema = new Schema({
     rating:  {
@@ -15,13 +15,15 @@ var commentSchema = new Schema({
         type: String,
         required: true
     },
-    author:  {
-        type: String,
-        required: true
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'        //reference is made to User schema model to retrieve the user name
     }
 }, {
     timestamps: true
 });
+
+
 
 
 const dishSchema = new Schema({
