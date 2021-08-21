@@ -31,6 +31,18 @@ connect.then((db) => {
 
 var app = express();
 
+//setting up a middleware such that any req coming to unsecure port 3000,will be redirected to secure port 3443(https)
+app.all('*',(req,res,next)=>{ //(*->for all req incoming)
+  if(req.secure)  // if(if req is coming in sec server go to next middleware)
+      return next();
+  else {
+     res.redirect(307, 'https://' + req.hostname + ':' + app.get('secPort') + req.url);
+   }  
+       //(307)represents that the target resource resides temporarily under the different url and user agent must not change the req method if automatic redirection is performed by the server.
+});
+
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

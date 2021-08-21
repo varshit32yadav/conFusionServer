@@ -21,7 +21,7 @@ dishRouter.route('/')    //by using this approach we r declaring several end oin
     .catch((err)=>next(err));
    
 })
-.post(authenticate.verifyUser,(req,res,next)=>{    //first .all() will execute n after next(); theses all methods will be exectuing 
+.post(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{    //first .all() will execute n after next(); theses all methods will be exectuing 
     Dishes.create(req.body)
     .then((dishes)=>{
         console.log("recieved the dihes"+dishes);
@@ -32,11 +32,11 @@ dishRouter.route('/')    //by using this approach we r declaring several end oin
     .catch((err)=>next(err));
     
 })
-.put(authenticate.verifyUser,(req,res,next)=>{ //we will first verify user wheteher it is authenticated to use this method (function is exported from authenticate module)
+.put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ //we will first verify user wheteher it is authenticated to use this method (function is exported from authenticate module)
  res.statusCode=403;
  res.end('PUT operation is not supported');
 })
-.delete(authenticate.verifyUser,(req,res,next)=>{ 
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ 
     Dishes.remove()
     .then((response)=>{
         res.statusCode=200;
@@ -57,11 +57,11 @@ dishRouter.route('/:dishId')
     },err=>next(err))     
     .catch((err)=>next(err));  
 })
-.post(authenticate.verifyUser,(req,res,next)=>{    
+.post(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{    
     res.statusCode=403;
     res.end('POST operation is not supported on dish/'+req.params.dishId);
 })
-.put(authenticate.verifyUser,(req,res,next)=>{ 
+.put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ 
     Dishes.findByIdAndUpdate(req.params.dishId,
         {$set:req.body},
         {new:true})   //when it is updated then take that dish in res body 
@@ -72,7 +72,7 @@ dishRouter.route('/:dishId')
         },err=>next(err))     
         .catch((err)=>next(err)); 
 })
-.delete(authenticate.verifyUser,(req,res,next)=>{ 
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ 
     Dishes.findByIdAndRemove(req.params.dishId)
     .then((response)=>{
         res.statusCode=200;
@@ -132,7 +132,7 @@ dishRouter.route('/:dishId/comments')
     res.end('PUT operation not supported on /dishes/'
         + req.params.dishId + '/comments');
 })
-.delete(authenticate.verifyUser,(req, res, next) => {
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req, res, next) => {
     Dishes.findById(req.params.dishId)
     .then((dish) => {
         if (dish != null) {

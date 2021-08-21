@@ -2,13 +2,20 @@ var express = require('express');
 var bodyParser=require('body-parser');
 var authenticate=require('../authenticate');
 var router = express.Router();
-var User=require('../models/user');
+var Users=require('../models/user');
 var passport=require('passport');
+
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with some resource');
+router.get('/',authenticate.verifyUser, authenticate.verifyAdmin,(req, res, next)=> {
+  Users.find({})
+  .then((users)=>{
+   res.statusCode=200;
+   res.setHeader('Content-Type', 'application/json');
+   res.json(users);
+  },err=>{next(err)})
+  .catch((err)=>next(err));
 });
 //signup
 router.post('/signup', (req, res, next) => {
