@@ -1,5 +1,6 @@
 const express =require('express');
 const bodyParser=require('body-Parser');
+const cors=require('./cors');
 var authenticate = require('../authenticate');
 
 const mongoose=require('mongoose');
@@ -9,7 +10,9 @@ const promoRouter=express.Router();
 promoRouter.use(bodyParser.json());
 
 promoRouter.route('/')
-.get((req,res,next)=>{
+.options(cors.corsWithOptions,(req,res)=>{res.sendStatus(200);})
+
+.get(cors.cors,(req,res,next)=>{
     Promotions.find({})
     .then((promo)=>{
         console.log('found your Dishes');
@@ -19,7 +22,7 @@ promoRouter.route('/')
     },err=>next(err))
     .catch((err)=>next(err));
 })
-.post(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
+.post(cors.corsWithOptions,authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Promotions.create(req.body)
     .then((promo)=>{
         console.log("recieved the Promo"+promo);
@@ -30,11 +33,11 @@ promoRouter.route('/')
     .catch((err)=>next(err));
 
 })
-.put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
+.put(cors.corsWithOptions,authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     res.statusCode=403;
     res.end('PUT method is not applicable here');
 })
-.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
+.delete(cors.corsWithOptions,authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Promotions.remove()
     .then((response)=>{
         res.statusCode=200;
@@ -45,7 +48,9 @@ promoRouter.route('/')
 });
 
 promoRouter.route('/:promoId')
-.get((req,res,next)=>{             //methods operating for a for particular Promotion end point
+.options(cors.corsWithOptions,(req,res)=>{res.sendStatus(200);})
+
+.get(cors.cors,(req,res,next)=>{             //methods operating for a for particular Promotion end point
    Promotions.findById(req.params.promoId)
    .then((promo)=>{
     res.statusCode=200;
@@ -54,11 +59,11 @@ promoRouter.route('/:promoId')
    },err=>next(err))
    .catch((err)=>next(err));
 })
-.post(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{    
+.post(cors.corsWithOptions,authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{    
     res.statusCode=403;
     res.end('POST operation is not supported on Promotion/'+req.params.promoId);
 })
-.put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ 
+.put(cors.corsWithOptions,authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ 
     Promotions.findByIdAndUpdate(req.params.promoId,{
         $set:req.body},
         {new:true}    //when it is updated then take that dish in res body 
@@ -71,7 +76,7 @@ promoRouter.route('/:promoId')
     },err=>next(err))
     .catch((err)=>next(err));
 })
-.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ 
+.delete(cors.corsWithOptions,authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{ 
     Promotions.findByIdAndRemove(req.params.promoId)
     .then((response)=>{
      res.statusCode=200;
