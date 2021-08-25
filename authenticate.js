@@ -1,7 +1,9 @@
 //this file we will use to store authentication strategies that we will configure.
 var passport=require('passport');
 var LocalStrategy=require('passport-local').Strategy;
+var FacebookTokenStrategy=require('passport-facebook-token');
 var User=require('./models/user');
+
 
 //for json web tokens use
 var JwtStrategy = require('passport-jwt').Strategy;
@@ -53,9 +55,35 @@ exports.verifyAdmin=((req,res,next)=>{
      }
      else
      {
-         var err=new Error("you not authorized to perform this operation(only admin)");
+         var err=new Error("you are not authorized to perform this operation(only admin)");
          err.status=403;
          return next(err);
           
      }
 });
+exports.facebookPassport = passport.use(new FacebookTokenStrategy({
+        clientID: config.facebook.clientId,    
+        clientSecret: config.facebook.clientSecret
+    }, (accessToken, refreshToken, profile, done) => {//you will start you work ones the express gets access token from Fb by user. And it got resources from FB by showing that token to FB. BEfore it middleware handles evrything 
+        User.findOne({facebookId: profile.id}, (err, user) => {
+            if (err) {
+                return done(err, false);
+            }
+            if (!err && user !== null) {  //found the user in database
+                return done(null, user);
+            }
+            else {                            //create a new user 
+                user = new User({ username: profile.displayName });
+                user.facebookId = profile.id;
+                user.firstname = profile.name.givenName;
+                user.lastname = profile.name.familyName;
+                user.save((err, user) => {
+                    if (err)
+                        return done(err, false);
+                    else
+                        return done(null, user);
+                })
+            }
+        });
+    }
+));

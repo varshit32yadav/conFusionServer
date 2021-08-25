@@ -13,6 +13,7 @@ var Schema = mongoose.Schema;
       type: String,
         default: ''
     },
+    facebookId: String,   //it will store fbId of the user that has pass the access token to the EXpress
     admin:   {
         type: Boolean,
         default: false
