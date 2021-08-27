@@ -28,7 +28,7 @@ dishRouter.route('/')    //by using this approach we r declaring several end oin
 .post(cors.corsWithOptions, authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{    //first .all() will execute n after next(); theses all methods will be exectuing 
     Dishes.create(req.body)
     .then((dishes)=>{
-        console.log("recieved the dihes"+dishes);
+        console.log("recieved the dihes");
         res.statusCode=200;
         res.setHeader('Content-Type','application/json');
         res.json(dishes);
